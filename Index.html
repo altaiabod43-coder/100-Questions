@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ملاذك - لعبة أسئلة حب</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family: Arial, sans-serif;
+}
+
+body{
+    min-height:100vh;
+    background:linear-gradient(135deg,#090000,#2b0000,#000);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    padding:15px;
+}
+
+.game{
+    width:100%;
+    max-width:700px;
+    background:#090909;
+    border-radius:25px;
+    padding:18px;
+    box-shadow:0 0 35px rgba(120,0,0,.9);
+}
+
+.card{
+    background:#fff3e6;
+    border:12px solid #7b0000;
+    border-radius:22px;
+    min-height:420px;
+    padding:28px;
+    text-align:center;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    gap:18px;
+}
+
+.logo{
+    color:#7b0000;
+    font-size:42px;
+    font-weight:bold;
+}
+
+.question{
+    font-size:26px;
+    font-weight:bold;
+    line-height:1.7;
+    color:#2b0000;
+}
+
+textarea{
+    width:100%;
+    height:90px;
+    padding:15px;
+    border:2px solid #7b0000;
+    border-radius:12px;
+    font-size:20px;
+    resize:none;
+    outline:none;
+    text-align:right;
+}
+
+button{
+    padding:14px 35px;
+    border:none;
+    border-radius:16px;
+    background:#7b0000;
+    color:white;
+    font-size:20px;
+    cursor:pointer;
+    transition:.3s;
+}
+
+button:hover{
+    background:#a00000;
+    transform:scale(1.04);
+}
+
+.count{
+    color:#7b0000;
+    font-weight:bold;
+    font-size:18px;
+}
+
+.heart{
+    font-size:38px;
+    color:#8b0000;
+}
+
+.answers-box{
+    display:none;
+    background:#fff3e6;
+    border:12px solid #7b0000;
+    border-radius:22px;
+    padding:25px;
+    margin-top:18px;
+    max-height:80vh;
+    overflow:auto;
+}
+
+.answers-box h2{
+    text-align:center;
+    color:#7b0000;
+    margin-bottom:20px;
+}
+
+.answer{
+    background:white;
+    padding:14px;
+    margin:12px 0;
+    border-right:6px solid #7b0000;
+    border-radius:12px;
+    font-size:18px;
+    line-height:1.6;
+    color:#250000;
+}
+
+.small-btn{
+    margin-top:15px;
+    width:100%;
+}
+</style>
+</head>
+
+<body>
+
+<div class="game">
+
+    <div class="card" id="gameCard">
+        <div class="logo">حبيبتي</div>
+
+        <p class="question" id="question"></p>
+
+        <textarea id="answerInput" placeholder="اكتب جوابك هنا..."></textarea>
+
+        <button onclick="nextQuestion()" id="nextBtn">التالي</button>
+
+        <p class="count" id="count"></p>
+
+        <div class="heart">♥</div>
+    </div>
+
+    <div class="answers-box" id="answersBox">
+        <h2>كل الأجوبة</h2>
+        <div id="answersList"></div>
+
+        <button class="small-btn" onclick="restartGame()">إعادة اللعبة</button>
+    </div>
+
+</div>
+
+<script>
+let questions = [
+"شنو أول شي جذبج بية؟",
+"شوكت أول مرة حسيتي إنج تحبيني؟",
+"شنو أكثر موقف صار بيننا خلاج تبتسمين بسببه؟",
+"شنو الشي اللي يميزني عن غيري؟",
+"لو توصفيني بكلمة وحدة شنو تكون؟",
+"شنو أكثر شي تخافين تخسري بيه؟",
+"شوكت تشتاقيلي اكثر؟",
+"شنو الشي اللي يخليج تفكرين بيه طول الوقت؟",
+"شنو أحلا ذكرى بيننا؟",
+"لو تكتبين الي رسالة هسة شنو تكولين؟",
+"شنو أكثر شي يعجبج بشكلي؟",
+"شنو أكثر صفة تحبيها بشخصيتي؟",
+"تحبين ضحكتي؟ وليش؟",
+"شنو أول شي تلاحظي بيه؟",
+"تحبين صوتي؟ وليش؟",
+"شنو أكثر شي يريّحج بوجودي؟",
+"شنو الشي اللي يخليج تغارين عليه؟",
+"تحبين اهتمامي الزايد؟",
+"شنو أكثر كلمة تحبين تسمعيها مني؟",
+"شنو الشي اللي يطمنج من اكون وياج؟",
+"شنو أكثر موقف خلاج تحبيني أكثر؟",
+"فد يوم او لحضة اشتاقيتيلي بيهة كلش؟",
+"شكد أطول وقت كعدتي تفكرين بية؟",
+"تحبين تقعدين وياي بهدوء لو نسولف؟",
+"شنو الشي اللي تحبين نسوي سوة؟",
+"شنو المكان اللي تتمنين نروحلة سوية؟",
+" تحبين نتمشة سوية؟",
+"شنو أكثر شي يخليج تضحكين وياية؟",
+"تحبين تسولفين وياي عن كلشي؟",
+"شنو أكثر موضوع تحبين نحچي بي سوة؟",
+"توثقين بية ثقة عمياء؟",
+"شنو الشي اللي يخليج تحسين بالأمان وياي؟",
+"تحسين اني افهمج؟",
+"شنو الشي اللي يخليج ترتاحيلي؟",
+"تحبين تسمعين نصائحي؟",
+"فد يوم وقفت وياج بموقف صعب؟",
+"شنو أكثر موقف دعتج بي؟",
+"تحسين إني قريب منج؟",
+"شنو الشي اللي يخليج تعتمدين عليه؟",
+"تحبين تشاركيني أسرارج؟",
+"شنو الشي اللي يزعلج مني؟",
+"ممكن تسامحيني بسرعة؟",
+"شنو أكثر شي تتمني يتغير؟",
+"تتضايقين إذا اتجاهلج؟",
+"شنو رد فعلج إذا ازعل؟",
+"تحبين تراضيه؟",
+"شنو أكثر شي يخليج تزعلين عليه؟",
+"تحبين تعتذرين لي؟",
+"شنو أصعب موقف صار بيننا؟",
+"شلون نرجع لبعض بعد الزعل؟",
+"لو طلبت منج شي صعب تسوي؟",
+"ممكن تضحين علمودي؟",
+"شنو أكبر تضحية ممكن تقدميها؟",
+"ممكن تنتظريني اذا اختفيت فجئة؟",
+"شنو أكثر شي يهمج بية؟",
+"تقدرين تعوفين كلشي علمودي؟",
+"شنو الشي اللي ما تقدرين تتنازلين عنه؟",
+"تحبين ابين لج مشاعري؟",
+"شنو أصعب شي تعترفيلي بي؟",
+"تخافين تخسريني؟",
+"شلون تتخيلين مستقبلنا؟",
+"تتمنين نعيش سوة؟",
+"شنو حلمج وياي؟",
+"مرة تخيلتي يوم زواجنة؟",
+"وين تحبين نسافر سوة؟",
+"شنو الشي اللي تتمنين نسوي بالمستقبل؟",
+"تحبين نبني حياتنة سوة؟",
+"شنو اهدفج بالعلاقة؟",
+"تحبين اكون قريب منج دائماً؟",
+"شنو الشي اللي يخليج تتمسكين بيه؟",
+"لو جنت قدامج هسة شنو راح تسوين؟",
+"شنو أول كلمة تقوليها الي؟",
+"رح تحضنيني؟",
+"شنو الشي اللي تتمنين يصير بيننا؟",
+"لو بيدج تسوين شي يسعدني شنو حتسوين؟",
+"شنو الشي اللي يخليني ابتسم؟",
+"تحبين تفاجئيني؟",
+"شنو أحلا هدية ممكن تعطيني اياها؟",
+"شنو الشي اللي تحبين نعيشه سوة؟",
+"تحبين تبقين وياي للأبد؟",
+"شنو أكثر شي يخليج تشتايلي؟",
+"تفكرين بيه قبل النوم؟",
+"حلمتي بيه؟ وشنو جان الحلم؟",
+"شنو الشي اللي يذكرج بيه؟",
+"تحبين تسمعين أغاني وتفكرين بيه؟",
+"شنو أكثر وقت تشتاقين الي بي؟",
+" تتمنين اكون وياج هسة؟",
+"شنو الشي اللي يخليج تحسين إني قريب منج؟",
+"تحبين تتخيليني وياج؟",
+"شنو آخر شي حابة تكولي الي؟",
+"شنو معنى الحب بالنسبة إلج؟",
+"الحب عندج كلام لو أفعال؟",
+"شنو الشي اللي يخليج تحس إني احبج صدك؟",
+"شنو أكثر تصرف بسيط يفرحج؟",
+"تحبين الرسائل الطويلة؟",
+"شنو أحلا كلمة حب سمعتيها مني؟",
+"شنو أكثر شي يخليج تطمئنين بالعلاقة؟",
+"تحبين الاهتمام اليومي؟",
+"شنو الشي اللي يخليج تحسين إنج مهمة بحياتي؟",
+"لو هذا آخر سؤال، شنو تقولين للشخص اللي تحبي؟"
+];
+
+let current = 0;
+let answers = [];
+
+function showQuestion(){
+    document.getElementById("question").innerText = questions[current];
+    document.getElementById("count").innerText = (current + 1) + " / " + questions.length;
+    document.getElementById("answerInput").value = "";
+
+    if(current === questions.length - 1){
+        document.getElementById("nextBtn").innerText = "تم";
+    }else{
+        document.getElementById("nextBtn").innerText = "التالي";
+    }
+}
+
+function nextQuestion(){
+    let input = document.getElementById("answerInput").value.trim();
+
+    if(input === ""){
+        alert("اكتب الجواب أولاً");
+        return;
+    }
+
+    answers.push(input);
+
+    if(current < questions.length - 1){
+        current++;
+        showQuestion();
+    }else{
+        showAnswers();
+    }
+}
+
+function showAnswers(){
+    document.getElementById("gameCard").style.display = "none";
+    document.getElementById("answersBox").style.display = "block";
+
+    let list = document.getElementById("answersList");
+    list.innerHTML = "";
+
+    for(let i = 0; i < questions.length; i++){
+        list.innerHTML += `
+            <div class="answer">
+                <b>${i + 1}- ${questions[i]}</b><br>
+                ${answers[i]}
+            </div>
+        `;
+    }
+}
+
+function restartGame(){
+    current = 0;
+    answers = [];
+    document.getElementById("gameCard").style.display = "flex";
+    document.getElementById("answersBox").style.display = "none";
+    showQuestion();
+}
+
+showQuestion();
+</script>
+
+</body>
+</html>
